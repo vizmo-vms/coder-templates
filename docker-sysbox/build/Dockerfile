@@ -27,7 +27,7 @@ RUN useradd --groups sudo,docker --create-home --shell /bin/bash ${USER} \
 	&& chmod 0440 /etc/sudoers.d/${USER}
 
 # symlink ~/docker to /var/lib/docker for peresistence
-RUN ln -s /home/${USER}/docker /var/lib/docker
+RUN mkdir -p /home/${USER}/docker && ln -s /home/${USER}/docker /var/lib/docker
 
 USER ${USER}
 WORKDIR /home/${USER}
