@@ -5,7 +5,7 @@ ARG USER=coder
 USER root
 
 # Install whichever Node version is LTS 20
-RUN curl -sL https://deb.nodesource.com/setup_20.x | bash -
+RUN curl -sL https://deb.nodesource.com/setup_18.x | bash -
 RUN DEBIAN_FRONTEND="noninteractive" apt-get update -y && \
     apt-get install -y nodejs
 
@@ -25,6 +25,9 @@ RUN apt install jq -y
 RUN useradd --groups sudo,docker --create-home --shell /bin/bash ${USER} \
 	&& echo "${USER} ALL=(ALL) NOPASSWD:ALL" >/etc/sudoers.d/${USER} \
 	&& chmod 0440 /etc/sudoers.d/${USER}
+
+# symlink ~/docker to /var/lib/docker for peresistence
+RUN ln -s /home/${USER}/docker /var/lib/docker
 
 USER ${USER}
 WORKDIR /home/${USER}
