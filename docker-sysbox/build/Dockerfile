@@ -26,8 +26,5 @@ RUN useradd --groups sudo,docker --create-home --shell /bin/bash ${USER} \
 	&& echo "${USER} ALL=(ALL) NOPASSWD:ALL" >/etc/sudoers.d/${USER} \
 	&& chmod 0440 /etc/sudoers.d/${USER}
 
-# symlink ~/docker to /var/lib/docker for peresistence
-RUN mkdir -p /home/${USER}/docker && ln -s /home/${USER}/docker /var/lib/docker
-
 USER ${USER}
 WORKDIR /home/${USER}
