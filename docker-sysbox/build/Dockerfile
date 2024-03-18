@@ -22,9 +22,13 @@ RUN mkdir -p -m 755 /etc/apt/keyrings && wget -qO- https://cli.github.com/packag
 
 RUN apt install jq -y
 
+RUN curl -sS https://starship.rs/install.sh | sh -s -- -y
+
 RUN useradd --groups sudo,docker --create-home --shell /bin/bash ${USER} \
 	&& echo "${USER} ALL=(ALL) NOPASSWD:ALL" >/etc/sudoers.d/${USER} \
 	&& chmod 0440 /etc/sudoers.d/${USER}
+
+RUN echo 'eval "$(starship init bash)"' >> /home/${USER}/.bashrc
 
 USER ${USER}
 WORKDIR /home/${USER}
