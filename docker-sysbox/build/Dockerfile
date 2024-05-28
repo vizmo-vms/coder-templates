@@ -31,7 +31,7 @@ RUN useradd --groups sudo,docker --create-home --shell /bin/bash ${USER} \
 RUN echo 'eval "$(starship init bash)"' >> /home/${USER}/.bashrc
 
 # install temporal
-RUN curl -sSf https://temporal.download/cli.sh | sh
+RUN curl -sSf https://temporal.download/cli.sh | sh -s -- --dir /home/${USER}/.temporalio
 
 # add temporal to path
 ENV PATH="$PATH:/home/${USER}/.temporalio/bin"
