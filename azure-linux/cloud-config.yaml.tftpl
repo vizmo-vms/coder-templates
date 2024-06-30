@@ -64,8 +64,6 @@ package_update: true
 package_upgrade: true
 runcmd:
   - chown ${username}:${username} /home/${username}
-  - systemctl enable coder-agent
-  - systemctl start coder-agent
 
   # Install Node.js LTS 18
   - curl -sL https://deb.nodesource.com/setup_18.x | sudo -E bash -
@@ -101,8 +99,21 @@ runcmd:
   - echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
   - apt-get update
   - apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+  # Change Docker storage path to a hidden folder
   - systemctl enable docker
   - systemctl start docker
+  - mkdir -p /home/${username}/.docker-data
+  - |
+    if [ -f /etc/docker/daemon.json ]; then
+      jq '. + {"data-root": "/home/${username}/.docker-data"}' /etc/docker/daemon.json > /tmp/daemon.json && mv /tmp/daemon.json /etc/docker/daemon.json
+    else
+      echo '{"data-root": "/home/${username}/.docker-data"}' | jq '.' > /etc/docker/daemon.json
+    fi
+  - systemctl restart docker
+
+  # start coder agent service
+  - systemctl enable coder-agent
+  - systemctl start coder-agent
 
   # Print completion message
   - echo "Setup complete!"
