@@ -70,8 +70,15 @@ runcmd:
   - sudo DEBIAN_FRONTEND="noninteractive" apt-get install -y nodejs
 
   # Set up npm global modules in user's homec
-  - echo 'export NPM_CONFIG_PREFIX=/home/${username}/.npm-global' >> /home/${username}/.bashrc
-  - echo 'export PATH=$PATH:/home/${username}/.npm-global/bin' >> /home/${username}/.bashrc
+  - |
+    if ! grep -q "NPM_CONFIG_PREFIX=/home/${username}/.npm-global" /home/${username}/.bashrc; then
+      echo 'export NPM_CONFIG_PREFIX=/home/${username}/.npm-global' >> /home/${username}/.bashrc
+    fi
+  - |
+    if ! grep -q "PATH=\$PATH:/home/${username}/.npm-global/bin" /home/${username}/.bashrc; then
+      echo 'export PATH=$PATH:/home/${username}/.npm-global/bin' >> /home/${username}/.bashrc
+    fi
+
 
   # Install GitHub CLI
   - |
@@ -87,11 +94,17 @@ runcmd:
 
   # Install Starship prompt
   - curl -sS https://starship.rs/install.sh | sudo sh -s -- -y
-  - echo 'eval "$(starship init bash)"' >> /home/${username}/.bashrc
+  - |
+    if ! grep -q "starship init bash" /home/${username}/.bashrc; then
+      echo 'eval "$(starship init bash)"' >> /home/${username}/.bashrc
+    fi
 
   # Install Temporal CLI
   - curl -sSf https://temporal.download/cli.sh | sh -s -- --dir /home/${username}/.temporalio
-  - echo 'export PATH="$PATH:/home/${username}/.temporalio/bin"' >> /home/${username}/.bashrc
+  - |
+    if ! grep -q "PATH=\$PATH:/home/${username}/.temporalio/bin" /home/${username}/.bashrc; then
+      echo 'export PATH="$PATH:/home/${username}/.temporalio/bin"' >> /home/${username}/.bashrc
+    fi
 
   # Install docker
   - mkdir -p /etc/apt/keyrings
