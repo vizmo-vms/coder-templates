@@ -103,12 +103,13 @@ runcmd:
   - curl -sSf https://temporal.download/cli.sh | sh -s -- --dir /home/${username}/.temporalio
   - |
     if ! grep -q "PATH=\$PATH:/home/${username}/.temporalio/bin" /home/${username}/.bashrc; then
-      echo 'export PATH="$PATH:/home/${username}/.temporalio/bin"' >> /home/${username}/.bashrc
+      echo 'export PATH=$PATH:/home/${username}/.temporalio/bin' >> /home/${username}/.bashrc
     fi
 
   # Install Hashicorp vault cli
-  - wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
-  - echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+  - wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+  - echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com
+  $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list > /dev/null
   - apt update && apt install vault
 
   # Install docker
