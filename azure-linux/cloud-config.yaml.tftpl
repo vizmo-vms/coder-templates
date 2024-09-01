@@ -132,6 +132,9 @@ runcmd:
   # start coder agent service
   - systemctl enable coder-agent
   - systemctl start coder-agent
+
+  # run docker prune
+  - docker system prune -f &
   
   # Print completion message
   - echo "Setup complete!"
