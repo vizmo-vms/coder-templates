@@ -70,10 +70,10 @@ data "coder_parameter" "home_size" {
   name         = "home_size"
   display_name = "Home volume size"
   description  = "How large would you like your home volume to be (in GB)?"
-  default      = 40
+  default      = 50
   type         = "number"
   icon         = "/icon/azure.png"
-  mutable      = false
+  mutable      = true
   validation {
     min = 1
     max = 1024
