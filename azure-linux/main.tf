@@ -14,7 +14,7 @@ data "coder_parameter" "location" {
   name         = "location"
   display_name = "Location"
   description  = "What location should your workspace live in?"
-  default      = "southindia"
+  default      = "centralindia"
   icon         = "/emojis/1f310.png"
   mutable      = false
   
@@ -29,11 +29,6 @@ data "coder_parameter" "location" {
     value = "centralindia"
     icon  = "/emojis/1f1ee-1f1f3.png"
   }
-  option {
-    name  = "India (Chennai)"
-    value = "southindia"
-    icon  = "/emojis/1f1ee-1f1f3.png"
-  }
   
 }
 
@@ -41,34 +36,40 @@ data "coder_parameter" "instance_type" {
   name         = "instance_type"
   display_name = "Instance type"
   description  = "What instance type should your workspace use?"
-  default      = "Standard_B4ms"
+  default      = "Standard_E4ads_v5"
   icon         = "/icon/azure.png"
   mutable      = false
+
   option {
-    name  = "Standard_B1ms (1 vCPU, 2 GiB RAM)"
-    value = "Standard_B1ms"
+    name  = "Standard_E4ads_v5 (4 vCPU, 32 GiB RAM)"
+    value = "Standard_E4ads_v5"
   }
   option {
-    name  = "Standard_B2ms (2 vCPU, 8 GiB RAM)"
-    value = "Standard_B2ms"
+    name  = "Standard_E8ads_v5 (8 vCPU, 64 GiB RAM)"
+    value = "Standard_E8ads_v5"
   }
   option {
-    name  = "Standard_B4ms (4 vCPU, 16 GiB RAM)"
-    value = "Standard_B4ms"
-  }
-  option {
-    name  = "Standard_B8ms (8 vCPU, 32 GiB RAM)"
-    value = "Standard_B8ms"
-  }
-  option {
-    name  = "Standard_B12ms (12 vCPU, 48 GiB RAM)"
-    value = "Standard_B12ms"
-  }
-  option {
-    name  = "Standard_B16ms (16 vCPU, 64 GiB RAM)"
-    value = "Standard_B16ms"
+    name  = "Standard_E16ads_v5 (16 vCPU, 128 GiB RAM)"
+    value = "Standard_E16ads_v5"
   }
   
+}
+
+data "coder_parameter" "instance_priority" {
+  name         = "instance_priority"
+  display_name = "Instance priority"
+  description  = "What instance priority should your workspace use?"
+  default      = "Spot"
+  icon         = "/icon/azure.png"
+
+  option {
+    name  = "Spot"
+    value = "Spot"
+  }
+  option {
+    name  = "Regular"
+    value = "Regular"
+  }
 }
 
 data "coder_parameter" "home_size" {
@@ -222,7 +223,8 @@ resource "azurerm_linux_virtual_machine" "main" {
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
   size                = data.coder_parameter.instance_type.value
-  // cloud-init overwrites this, so the value here doesn't matter
+  priority            = data.coder_parameter.instance_priority.value
+  eviction_policy     = data.coder_parameter.instance_priority.value == "Spot" ? "Deallocate" : null  // cloud-init overwrites this, so the value here doesn't matter
   admin_username = "adminuser"
   admin_ssh_key {
     public_key = tls_private_key.dummy.public_key_openssh
