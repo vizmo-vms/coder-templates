@@ -29,6 +29,11 @@ data "coder_parameter" "location" {
     value = "centralindia"
     icon  = "/emojis/1f1ee-1f1f3.png"
   }
+  option {
+    name  = "India (Chennai)"
+    value = "southindia"
+    icon  = "/emojis/1f1ee-1f1f3.png"
+  }
   
 }
 
