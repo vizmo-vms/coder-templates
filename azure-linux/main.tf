@@ -14,7 +14,7 @@ data "coder_parameter" "location" {
   name         = "location"
   display_name = "Location"
   description  = "What location should your workspace live in?"
-  default      = "centralindia"
+  default      = "southindia"
   icon         = "/emojis/1f310.png"
   mutable      = false
   
