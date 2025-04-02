@@ -82,7 +82,7 @@ data "coder_parameter" "home_size" {
   mutable      = true
   validation {
     min = 1
-    max = 1024
+    max = 2048
   }
 }
 
@@ -224,7 +224,7 @@ resource "azurerm_linux_virtual_machine" "main" {
   location            = azurerm_resource_group.main.location
   size                = data.coder_parameter.instance_type.value
   priority            = data.coder_parameter.instance_priority.value
-  eviction_policy     = data.coder_parameter.instance_priority.value == "Spot" ? "Deallocate" : null  // cloud-init overwrites this, so the value here doesn't matter
+  eviction_policy     = data.coder_parameter.instance_priority.value == "Spot" ? "Delete" : null  // cloud-init overwrites this, so the value here doesn't matter
   admin_username = "adminuser"
   admin_ssh_key {
     public_key = tls_private_key.dummy.public_key_openssh
