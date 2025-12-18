@@ -87,7 +87,11 @@ data "coder_parameter" "home_size" {
 }
 
 provider "azurerm" {
-  features {}
+  features {
+    virtual_machine {
+      delete_os_disk_on_deletion = true
+    }
+  }
 }
 
 data "coder_workspace" "me" {
@@ -132,6 +136,28 @@ resource "coder_agent" "main" {
       df /home/${data.coder_workspace_owner.me.name} | awk '$NF=="/"{printf "%s", $5}'
     EOT
   }
+}
+
+# See https://registry.coder.com/modules/coder/code-server
+module "code-server" {
+  count  = data.coder_workspace.me.start_count
+  source = "registry.coder.com/coder/code-server/coder"
+
+  # This ensures that the latest non-breaking version of the module gets downloaded, you can also pin the module version to prevent breaking changes in production.
+  version = "~> 1.0"
+
+  agent_id = coder_agent.main.id
+  order    = 1
+}
+
+# See https://registry.coder.com/modules/coder/jetbrains
+module "jetbrains" {
+  count      = data.coder_workspace.me.start_count
+  source     = "registry.coder.com/coder/jetbrains/coder"
+  version    = "~> 1.0"
+  agent_id   = coder_agent.main.id
+  agent_name = "main"
+  folder     = "/home/coder"
 }
 
 locals {
