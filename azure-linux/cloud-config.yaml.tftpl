@@ -1,6 +1,6 @@
 #cloud-config
 cloud_final_modules:
-- [scripts-user, always]
+  - [scripts-user, always]
 bootcmd:
   # work around https://github.com/hashicorp/terraform-provider-azurerm/issues/6117
   - until [ -e /dev/disk/azure/scsi1/lun10 ]; do sleep 1; done
@@ -22,7 +22,7 @@ groups:
 users:
   - name: ${username}
     sudo: ["ALL=(ALL) NOPASSWD:ALL"]
-    groups: 
+    groups:
       - sudo
       - docker
     shell: /bin/bash
@@ -66,7 +66,7 @@ runcmd:
   - chown ${username}:${username} /home/${username}
 
   # Install Node.js LTS 20
-  - curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+  - curl -sL https://deb.nodesource.com/setup_22.x | sudo -E bash -
   - sudo DEBIAN_FRONTEND="noninteractive" apt-get install -y nodejs
 
   # Set up npm global modules in user's homec
@@ -78,7 +78,6 @@ runcmd:
     if ! grep -q "PATH=\$PATH:/home/${username}/.npm-global/bin" /home/${username}/.bashrc; then
       echo 'export PATH=$PATH:/home/${username}/.npm-global/bin' >> /home/${username}/.bashrc
     fi
-
 
   # Install GitHub CLI
   - |
@@ -128,13 +127,12 @@ runcmd:
       echo '{"data-root": "/home/${username}/.docker-data"}' | jq '.' > /etc/docker/daemon.json
     fi
   - systemctl restart docker
-
   # start coder agent service
   - systemctl enable coder-agent
   - systemctl start coder-agent
 
   # run docker prune
   - docker system prune -f &
-  
+
   # Print completion message
   - echo "Setup complete!"
