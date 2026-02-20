@@ -34,13 +34,6 @@ packages:
   - gnupg
   - lsb-release
   - unattended-upgrades
-  - build-essential
-  - pkg-config
-  - libcairo2-dev
-  - libpango1.0-dev
-  - libjpeg-dev
-  - libgif-dev
-  - librsvg2-dev
 write_files:
   - path: /opt/coder/init
     permissions: "0755"
@@ -74,7 +67,7 @@ runcmd:
 
   # Install Node.js LTS 20
   - curl -sL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-  - sudo DEBIAN_FRONTEND="noninteractive" apt-get install -y nodejs
+  - sudo DEBIAN_FRONTEND="noninteractive" apt install -y nodejs
 
   # Set up npm global modules in user's homec
   - |
@@ -92,11 +85,11 @@ runcmd:
     wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null
     sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-    sudo apt-get update
-    sudo apt-get install -y gh
+    sudo apt update
+    sudo apt install -y gh
 
   # Install jq
-  - sudo apt-get install -y jq
+  - sudo apt install -y jq
 
   # Install Starship prompt
   - curl -sS https://starship.rs/install.sh | sudo sh -s -- -y
@@ -115,14 +108,14 @@ runcmd:
   # Install Hashicorp vault cli
   - wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
   - echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list > /dev/null
-  - apt update && apt install vault
+  - apt update && apt install -y vault
 
   # Install docker
   - mkdir -p /etc/apt/keyrings
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
   - echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
-  - apt-get update
-  - apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+  - apt update
+  - apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
   # Change Docker storage path to a hidden folder
   - systemctl enable docker
   - systemctl start docker
@@ -140,6 +133,9 @@ runcmd:
 
   # run docker prune
   - docker system prune -f &
+
+  # Install canvas dependencies (NEEDRESTART_MODE=a prevents the interactive prompt for restarting services)
+  - NEEDRESTART_MODE=a DEBIAN_FRONTEND=noninteractive apt install -y build-essential pkg-config libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
 
   # Print completion message
   - echo "Setup complete!"
