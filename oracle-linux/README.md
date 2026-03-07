@@ -100,7 +100,7 @@ oci network subnet list --compartment-id <compartment_ocid> --all --query 'data[
 
 ## Architecture
 
-This template assumes you have a shared OCI network already created (one VCN, one subnet, one IGW) and provisions the following per workspace:
+This template assumes you have a shared OCI network already created (for example, one VCN and one subnet with the required outbound path) and provisions the following per workspace:
 
 - OCI preemptible VM (`VM.Standard.E4.Flex`, `2` OCPUs, `16/32` GB RAM)
 - Persistent OCI block volume for home directory

@@ -147,15 +147,6 @@ locals {
     #!/usr/bin/env sh
     set -eux
 
-    waitonexit() {
-      code=$?
-      if [ "$code" -ne 0 ]; then
-        echo "=== Agent script exited with non-zero code ($code). Sleeping 24h to preserve logs..."
-        sleep 86400
-      fi
-    }
-    trap waitonexit EXIT
-
     BINARY_DIR="$(mktemp -d -t coder.XXXXXX)"
     BINARY_NAME="coder"
     BINARY_URL="${trimsuffix(data.coder_workspace.me.access_url, "/")}/bin/coder-linux-amd64"

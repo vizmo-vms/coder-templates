@@ -64,8 +64,6 @@ write_files:
 package_update: true
 package_upgrade: true
 runcmd:
-  # Fix for OCI Ubuntu 24.04 default restrictive iptables rules
-  # - iptables -I INPUT 1 -j ACCEPT
   - chown ${username}:${username} /home/${username}
 
   # Install Node.js LTS 22
