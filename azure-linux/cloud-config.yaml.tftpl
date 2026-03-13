@@ -4,6 +4,8 @@ cloud_final_modules:
 bootcmd:
   # work around https://github.com/hashicorp/terraform-provider-azurerm/issues/6117
   - until [ -e /dev/disk/azure/scsi1/lun10 ]; do sleep 1; done
+  # Defer Ubuntu background apt work until cloud-init package steps are done.
+  - systemctl mask --now apt-daily.service apt-daily.timer apt-daily-upgrade.service apt-daily-upgrade.timer apt-news.service esm-cache.service || true
 device_aliases:
   homedir: /dev/disk/azure/scsi1/lun10
 disk_setup:
@@ -126,12 +128,12 @@ runcmd:
     else
       echo '{"data-root": "/home/${username}/.docker-data"}' | jq '.' > /etc/docker/daemon.json
     fi
-  
+
   # Configure containerd storage
   - mkdir -p /home/${username}/.containerd-data
   - mkdir -p /etc/containerd
   - containerd config default > /etc/containerd/config.toml
-  - sed -i "s|root = \"/var/lib/containerd\"|root = \"/home/${username}/.containerd-data\"|g" /etc/containerd/config.toml
+  - sed -i "s|root = '/var/lib/containerd'|root = '/home/${username}/.containerd-data'|g" /etc/containerd/config.toml
   - systemctl restart containerd
 
   - systemctl restart docker
@@ -144,6 +146,10 @@ runcmd:
 
   # Install canvas dependencies (NEEDRESTART_MODE=a prevents the interactive prompt for restarting services)
   - NEEDRESTART_MODE=a DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Lock::Timeout=120 install build-essential pkg-config libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+
+  # Re-enable Ubuntu background apt work after cloud-init package steps are done.
+  - systemctl unmask apt-daily.service apt-daily.timer apt-daily-upgrade.service apt-daily-upgrade.timer apt-news.service esm-cache.service || true
+  - systemctl start apt-daily.timer apt-daily-upgrade.timer || true
 
   # Print completion message
   - echo "Setup complete!"

@@ -5,6 +5,8 @@ bootcmd:
   # OCI utilities are sometimes delayed or missing in newer Ubuntu images. Explicitly fallback to /dev/sdb
   - until [ -b /dev/sdb ] || [ -e /dev/oracleoci/oraclevdb ]; do sleep 1; done
   - if [ -e /dev/oracleoci/oraclevdb ]; then ln -sTf /dev/oracleoci/oraclevdb /dev/coder_home; else ln -sTf /dev/sdb /dev/coder_home; fi
+  # Defer Ubuntu background apt work until cloud-init package steps are done.
+  - systemctl mask --now apt-daily.service apt-daily.timer apt-daily-upgrade.service apt-daily-upgrade.timer apt-news.service esm-cache.service || true
 device_aliases:
   homedir: /dev/coder_home
 disk_setup:
@@ -68,7 +70,7 @@ runcmd:
 
   # Install Node.js LTS 22
   - curl -sL https://deb.nodesource.com/setup_22.x | sudo -E bash -
-  - sudo DEBIAN_FRONTEND="noninteractive" apt-get -y -o Dpkg::Lock::Timeout=120 install nodejs
+  - sudo DEBIAN_FRONTEND="noninteractive" apt-get -y install nodejs
 
   # Set up npm global modules in user's home
   - |
@@ -86,11 +88,11 @@ runcmd:
     wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /etc/apt/keyrings/githubcli-archive-keyring.gpg > /dev/null
     sudo chmod go+r /etc/apt/keyrings/githubcli-archive-keyring.gpg
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-    sudo apt-get -o Dpkg::Lock::Timeout=120 update
-    sudo apt-get -y -o Dpkg::Lock::Timeout=120 install gh
+    sudo apt-get update
+    sudo apt-get -y install gh
 
   # Install jq
-  - sudo apt-get -y -o Dpkg::Lock::Timeout=120 install jq
+  - sudo apt-get -y install jq
 
   # Install Starship prompt
   - curl -sS https://starship.rs/install.sh | sudo sh -s -- -y
@@ -109,14 +111,14 @@ runcmd:
   # Install Hashicorp Vault CLI
   - wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
   - echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list > /dev/null
-  - apt-get -o Dpkg::Lock::Timeout=120 update && apt-get -y -o Dpkg::Lock::Timeout=120 install vault
+  - apt-get update && apt-get -y install vault
 
   # Install Docker
   - mkdir -p /etc/apt/keyrings
   - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
   - echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
-  - apt-get -o Dpkg::Lock::Timeout=120 update
-  - apt-get -y -o Dpkg::Lock::Timeout=120 install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+  - apt-get update
+  - apt-get -y install docker-ce docker-ce-cli containerd.io docker-compose-plugin
   - systemctl enable docker
   - systemctl start docker
   - mkdir -p /home/${username}/.docker-data
@@ -126,12 +128,12 @@ runcmd:
     else
       echo '{"data-root": "/home/${username}/.docker-data"}' | jq '.' > /etc/docker/daemon.json
     fi
-  
+
   # Configure containerd storage
   - mkdir -p /home/${username}/.containerd-data
   - mkdir -p /etc/containerd
   - containerd config default > /etc/containerd/config.toml
-  - sed -i "s|root = \"/var/lib/containerd\"|root = \"/home/${username}/.containerd-data\"|g" /etc/containerd/config.toml
+  - sed -i "s|root = '/var/lib/containerd'|root = '/home/${username}/.containerd-data'|g" /etc/containerd/config.toml
   - systemctl restart containerd
 
   - systemctl restart docker
@@ -143,7 +145,11 @@ runcmd:
   - docker system prune -f &
 
   # Install canvas dependencies
-  - NEEDRESTART_MODE=a DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Lock::Timeout=120 install build-essential pkg-config libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+  - NEEDRESTART_MODE=a DEBIAN_FRONTEND=noninteractive apt-get -y install build-essential pkg-config libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+
+  # Re-enable Ubuntu background apt work after cloud-init package steps are done.
+  - systemctl unmask apt-daily.service apt-daily.timer apt-daily-upgrade.service apt-daily-upgrade.timer apt-news.service esm-cache.service || true
+  - systemctl start apt-daily.timer apt-daily-upgrade.timer || true
 
   # Print completion message
   - echo "Setup complete!"
