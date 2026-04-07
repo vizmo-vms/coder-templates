@@ -63,6 +63,11 @@ data "coder_parameter" "workspace_memory_gb" {
   }
 
   option {
+    name  = "24 GB (2 OCPU)"
+    value = "24"
+  }
+
+  option {
     name  = "32 GB (2 OCPU)"
     value = "32"
   }
