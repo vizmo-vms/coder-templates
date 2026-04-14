@@ -224,16 +224,6 @@ resource "coder_metadata" "workspace_info" {
     key   = "memory"
     value = "${data.hcloud_server_type.selected.memory} GiB"
   }
-
-  item {
-    key   = "location"
-    value = "Falkenstein (fsn1)"
-  }
-
-  item {
-    key   = "network"
-    value = "IPv6 only"
-  }
 }
 
 resource "coder_metadata" "home_info" {
