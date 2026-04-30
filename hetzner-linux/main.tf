@@ -16,7 +16,7 @@ data "coder_parameter" "instance_type" {
   description  = "Which Hetzner Cloud server type should your workspace use?"
   default      = "cx43"
   icon         = "/emojis/2601-fe0f.png"
-  mutable      = false
+  mutable      = true
 
   option {
     name  = "cx43 (8 vCPU, 16 GiB RAM)"
@@ -26,6 +26,16 @@ data "coder_parameter" "instance_type" {
   option {
     name  = "cx53 (16 vCPU, 32 GiB RAM)"
     value = "cx53"
+  }
+
+  option {
+    name  = "cpx42 (8 vCPU, 16 GiB RAM)"
+    value = "cpx42"
+  }
+
+  option {
+    name  = "cpx52 (12 vCPU, 24 GiB RAM)"
+    value = "cpx52"
   }
 }
 
