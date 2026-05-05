@@ -13,8 +13,9 @@ Provision Hetzner Cloud Linux VMs as [Coder workspaces](https://coder.com/docs/v
 
 ## What this template gives you
 
-- Hetzner Cloud workspace VMs in Falkenstein (`fsn1`)
+- Hetzner Cloud workspace VMs in a selectable location: Falkenstein (`fsn1`), Nuremberg (`nbg1`), or Helsinki (`hel1`)
 - Fixed server choices: `cx43` or `cx53`
+- Built-in validation that blocks server types unavailable in the selected location
 - Public IPv4 and IPv6 on each workspace server
 - Persistent `100 GiB` volume mounted at `/home/<username>`
 - No SSH access and no root-password email, when created with a pre-existing Hetzner SSH key name

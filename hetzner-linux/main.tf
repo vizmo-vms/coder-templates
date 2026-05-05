@@ -39,6 +39,30 @@ data "coder_parameter" "instance_type" {
   }
 }
 
+data "coder_parameter" "location" {
+  name         = "location"
+  display_name = "Location"
+  description  = "Which Hetzner Cloud location should your workspace live in?"
+  default      = "nbg1"
+  icon         = "/emojis/1f4cd.png"
+  mutable      = true
+
+  option {
+    name  = "Falkenstein (fsn1)"
+    value = "fsn1"
+  }
+
+  option {
+    name  = "Nuremberg (nbg1)"
+    value = "nbg1"
+  }
+
+  option {
+    name  = "Helsinki (hel1)"
+    value = "hel1"
+  }
+}
+
 provider "hcloud" {}
 
 data "coder_workspace" "me" {}
@@ -48,7 +72,7 @@ data "hcloud_server_type" "selected" {
   name = data.coder_parameter.instance_type.value
 }
 
-check "selected_server_type_available_in_fsn1" {
+check "selected_server_type_available_in_location" {
   assert {
     condition = contains(
       [for location in data.hcloud_server_type.selected.locations : location.name],
@@ -109,7 +133,7 @@ module "code-server" {
 }
 
 locals {
-  location            = "fsn1"
+  location            = data.coder_parameter.location.value
   home_volume_size_gb = 100
   raw_name            = lower("coder-${data.coder_workspace_owner.me.name}-${data.coder_workspace.me.name}")
   sanitized_name      = trim(replace(local.raw_name, "/[^a-z0-9-]/", "-"), "-")
