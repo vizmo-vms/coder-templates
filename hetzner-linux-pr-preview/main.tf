@@ -135,6 +135,64 @@ locals {
   base_name           = trimsuffix(substr(local.sanitized_name != "" ? local.sanitized_name : "coder-workspace", 0, 58), "-")
   server_name         = local.base_name
   volume_name         = "${local.base_name}-home"
+  preview_apps        = {
+    portal = {
+      display_name     = "Portal"
+      port             = 1338
+      path             = "/"
+      healthcheck_path = "/__/env.json"
+      order            = 2
+    }
+    touchless = {
+      display_name     = "Touchless"
+      port             = 1339
+      path             = "/"
+      healthcheck_path = "/__/env.json"
+      order            = 3
+    }
+    server = {
+      display_name     = "Server"
+      port             = 1337
+      path             = "/"
+      healthcheck_path = "/vms/health"
+      order            = 4
+    }
+    "live-query" = {
+      display_name     = "LiveQuery"
+      port             = 1334
+      path             = "/health"
+      healthcheck_path = "/health"
+      order            = 5
+    }
+    temporal = {
+      display_name     = "Temporal UI"
+      port             = 8233
+      path             = "/"
+      healthcheck_path = "/"
+      order            = 6
+    }
+    sendria = {
+      display_name     = "Sendria"
+      port             = 1080
+      path             = "/"
+      healthcheck_path = "/"
+      order            = 7
+    }
+    "parse-dashboard" = {
+      display_name     = "Parse Dashboard"
+      port             = 4040
+      path             = "/"
+      healthcheck_path = "/"
+      order            = 8
+    }
+    shlink = {
+      display_name     = "Shlink"
+      port             = 1335
+      path             = "/"
+      healthcheck_path = "/l/rest/health"
+      order            = 9
+    }
+  }
 
   agent_init_script = <<-EOT
     #!/usr/bin/env sh
@@ -189,6 +247,24 @@ locals {
     hostname           = local.server_name
     home_volume_device = hcloud_volume.home.linux_device
   })
+}
+
+resource "coder_app" "preview" {
+  for_each = local.preview_apps
+
+  agent_id     = coder_agent.main.id
+  slug         = each.key
+  display_name = each.value.display_name
+  url          = "http://localhost:${each.value.port}${each.value.path}"
+  subdomain    = true
+  share        = "authenticated"
+  order        = each.value.order
+
+  healthcheck {
+    url       = "http://localhost:${each.value.port}${each.value.healthcheck_path}"
+    interval  = 5
+    threshold = 12
+  }
 }
 
 resource "hcloud_volume" "home" {

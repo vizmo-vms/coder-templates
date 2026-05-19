@@ -24,6 +24,7 @@ This template variant is intended for PR preview environments.
 - No SSH access and no root-password email, when created with a pre-existing Hetzner SSH key name
 - Shared firewall support through the `coder_workspace=true` label
 - Boot-time preview bootstrap service that runs `~/.preview/start.sh` when present
+- Coder apps for the published preview surfaces, shared with authenticated Coder users
 - Intended Coder default autostop/sleep time of 30 minutes
 
 ## Prerequisites
@@ -70,10 +71,16 @@ This template provisions the following resources per workspace:
 
 - Hetzner Cloud server (ephemeral, deleted on workspace stop)
 - Hetzner Cloud volume (persistent, reattached and mounted at `/home/<username>`)
+- Coder apps for Portal, Touchless, Server, LiveQuery, Temporal UI, Sendria,
+  Parse Dashboard, and Shlink
 
 When a workspace stops, the VM is deleted. On the next start, a new VM is created and the existing home volume is reattached, preserving user files in `/home/<username>`.
 
 Network and firewall resources are shared and are not created by this template.
+
+The Coder apps use subdomain routing, proxy their matching local preview ports,
+and set `share = "authenticated"`. S3/MinIO remains internal-only and is not
+registered as a Coder app.
 
 ## Networking Notes
 
