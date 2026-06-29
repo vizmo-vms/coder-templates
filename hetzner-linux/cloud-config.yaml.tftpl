@@ -62,10 +62,17 @@ write_files:
 
       [Install]
       WantedBy=multi-user.target
+  - path: /etc/sysctl.d/99-coder-file-watchers.conf
+    permissions: "0644"
+    content: |
+      fs.inotify.max_user_watches = 524288
+      fs.inotify.max_user_instances = 524288
 package_update: true
 package_upgrade: true
 runcmd:
   - chown ${username}:${username} /home/${username}
+  # Apply file watcher sysctl limits during first boot.
+  - sysctl -p /etc/sysctl.d/99-coder-file-watchers.conf
 
   # Add this right before your first apt commands
   - |
@@ -152,6 +159,9 @@ runcmd:
 
   # Install canvas dependencies
   - NEEDRESTART_MODE=a DEBIAN_FRONTEND=noninteractive apt-get -y install build-essential pkg-config libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
+
+  # Install Chromium dependencies
+  - NEEDRESTART_MODE=a DEBIAN_FRONTEND=noninteractive apt-get -y install xvfb fonts-noto-color-emoji fonts-unifont libfontconfig1 libfreetype6 xfonts-cyrillic xfonts-scalable fonts-liberation fonts-ipafont-gothic fonts-wqy-zenhei fonts-tlwg-loma-otf fonts-freefont-ttf libasound2t64 libatk-bridge2.0-0t64 libatk1.0-0t64 libatspi2.0-0t64 libcairo2 libcups2t64 libdbus-1-3 libdrm2 libgbm1 libglib2.0-0t64 libnspr4 libnss3 libpango-1.0-0 libx11-6 libxcb1 libxcomposite1 libxdamage1 libxext6 libxfixes3 libxkbcommon0 libxrandr2
 
   # Re-enable Ubuntu background apt work after cloud-init package steps are done.
   - systemctl unmask apt-daily.service apt-daily.timer apt-daily-upgrade.service apt-daily-upgrade.timer apt-news.service esm-cache.service || true
