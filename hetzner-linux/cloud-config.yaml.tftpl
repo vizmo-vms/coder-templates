@@ -2,20 +2,31 @@
 cloud_final_modules:
   - [scripts-user, always]
 bootcmd:
-  - until [ -b ${home_volume_device} ]; do sleep 1; done
-  - ln -sTf ${home_volume_device} /dev/coder_home
+  - |
+    set -eu
+    until [ -b ${home_volume_device} ]; do sleep 1; done
+    ln -sTf ${home_volume_device} /dev/coder_home
+
+    if blkid -L coder_home >/dev/null 2>&1; then
+      exit 0
+    fi
+
+    fs_type="$(blkid -s TYPE -o value /dev/coder_home 2>/dev/null || true)"
+    first_partition="$(lsblk -nrpo NAME,TYPE /dev/coder_home | awk '$2 == "part" { print $1; exit }')"
+
+    if [ -n "$fs_type" ]; then
+      if [ "$fs_type" = "ext2" ] || [ "$fs_type" = "ext3" ] || [ "$fs_type" = "ext4" ]; then
+        e2label /dev/coder_home coder_home
+      else
+        echo "Home volume already has filesystem $fs_type; leaving it unchanged" >&2
+      fi
+    elif [ -n "$first_partition" ]; then
+      echo "Home volume has partitions but no coder_home label; leaving it unchanged" >&2
+    else
+      mkfs.ext4 -F -L coder_home /dev/coder_home
+    fi
   # Defer Ubuntu background apt work until cloud-init package steps are done.
   # - systemctl mask --now apt-daily.service apt-daily.timer apt-daily-upgrade.service apt-daily-upgrade.timer apt-news.service esm-cache.service || true
-device_aliases:
-  homedir: /dev/coder_home
-disk_setup:
-  homedir:
-    table_type: gpt
-    layout: true
-fs_setup:
-  - label: coder_home
-    filesystem: ext4
-    device: homedir.1
 mounts:
   - ["LABEL=coder_home", "/home/${username}"]
 hostname: ${hostname}
