@@ -509,8 +509,8 @@ resource "kubernetes_manifest" "main" {
               ]
               resources = {
                 requests = {
-                  cpu    = "500m"
-                  memory = "1Gi"
+                  cpu    = "2"
+                  memory = "4Gi"
                 }
                 limits = {
                   cpu    = data.coder_parameter.cpu.value
