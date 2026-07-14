@@ -97,10 +97,13 @@ data "coder_workspace" "me" {}
 data "coder_workspace_owner" "me" {}
 
 locals {
-  namespace      = "preview"
-  workspace_name = "coder-${data.coder_workspace.me.id}"
-  workspace_user = data.coder_workspace_owner.me.name
-  home_path      = "/home/${local.workspace_user}"
+  namespace                = "preview"
+  workspace_name_slug_raw  = trim(replace(lower(data.coder_workspace.me.name), "/[^a-z0-9-]/", "-"), "-")
+  workspace_name_slug      = coalesce(local.workspace_name_slug_raw, "workspace")
+  workspace_name_slug_part = trim(substr(local.workspace_name_slug, 0, 43), "-")
+  workspace_name           = "coder-${local.workspace_name_slug_part}-${substr(data.coder_workspace.me.id, 0, 8)}"
+  workspace_user           = data.coder_workspace_owner.me.name
+  home_path                = "/home/${local.workspace_user}"
 
   selector_labels = {
     "app.kubernetes.io/name"     = "coder-preview-workspace"

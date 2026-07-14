@@ -99,6 +99,7 @@ This template provisions the following resources per workspace:
 
 - Kubernetes PersistentVolumeClaim for `/home/<workspace owner>`
 - Kubernetes Deployment with one Sysbox-backed workspace pod while the workspace is running
+  using a readable `coder-<workspace name>-<short id>` name
 - Coder apps for Portal, Touchless, Server, LiveQuery, Temporal UI, Sendria,
   Parse Dashboard, and Shlink
 
